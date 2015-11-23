@@ -1513,7 +1513,9 @@ bool EventHandler::handleMousePressEvent(const PlatformMouseEvent& mouseEvent)
         return true;
 #endif
 
+#if ENABLE(GESTURE_EVENTS)
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
+#endif
 
     // FIXME (bug 68185): this call should be made at another abstraction layer
     m_frame->loader()->resetMultipleFormSubmissionProtection();
@@ -1646,7 +1648,9 @@ bool EventHandler::handleMouseDoubleClickEvent(const PlatformMouseEvent& mouseEv
 
     m_frame->selection()->setCaretBlinkingSuspended(false);
 
+#if ENABLE(GESTURE_EVENTS)
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
+#endif
 
     // We get this instead of a second mouse-up 
     m_mousePressed = false;
@@ -1879,7 +1883,9 @@ bool EventHandler::handleMouseReleaseEvent(const PlatformMouseEvent& mouseEvent)
         return true;
 #endif
 
+#if ENABLE(GESTURE_EVENTS)
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
+#endif
 
 #if ENABLE(PAN_SCROLLING)
     m_autoscrollController->handleMouseReleaseEvent(mouseEvent);
@@ -2813,13 +2819,15 @@ bool EventHandler::isScrollbarHandlingGestures() const
 #endif // ENABLE(GESTURE_EVENTS)
 
 #if ENABLE(TOUCH_ADJUSTMENT)
+
+#if ENABLE(TOUCH_ADJUSTMENT) && ENABLE(GESTURE_EVENTS)
 bool EventHandler::shouldApplyTouchAdjustment(const PlatformGestureEvent& event) const
 {
     if (m_frame->settings() && !m_frame->settings()->touchAdjustmentEnabled())
         return false;
     return !event.area().isEmpty();
 }
-
+#endif
 
 bool EventHandler::bestClickableNodeForTouchPoint(const IntPoint& touchCenter, const IntSize& touchRadius, IntPoint& targetPoint, Node*& targetNode)
 {
@@ -2856,6 +2864,7 @@ bool EventHandler::bestZoomableAreaForTouchPoint(const IntPoint& touchCenter, co
     return findBestZoomableArea(targetNode, targetArea, touchCenter, touchRect, result.rectBasedTestResult());
 }
 
+#if ENABLE(TOUCH_ADJUSTMENT) && ENABLE(GESTURE_EVENTS)
 bool EventHandler::adjustGesturePosition(const PlatformGestureEvent& gestureEvent, IntPoint& adjustedPoint)
 {
     if (!shouldApplyTouchAdjustment(gestureEvent))
@@ -2878,6 +2887,8 @@ bool EventHandler::adjustGesturePosition(const PlatformGestureEvent& gestureEven
     }
     return targetNode;
 }
+#endif
+
 #endif
 
 #if ENABLE(CONTEXT_MENUS)
@@ -3194,8 +3205,10 @@ bool EventHandler::keyEvent(const PlatformKeyboardEvent& initialKeyEvent)
     if (!node)
         return false;
 
+#if ENABLE(GESTURE_EVENTS)
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
     UserTypingGestureIndicator typingGestureIndicator(m_frame);
+#endif
 
     if (FrameView* view = m_frame->view())
         view->resetDeferredRepaintDelay();
@@ -3871,7 +3884,9 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
 
     const Vector<PlatformTouchPoint>& points = event.touchPoints();
 
+#if ENABLE(GESTURE_EVENTS)
     UserGestureIndicator gestureIndicator(DefinitelyProcessingUserGesture);
+#endif
 
     unsigned i;
     bool freshTouchEvents = true;
@@ -3914,8 +3929,10 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
             break;
         }
 
+#if ENABLE(GESTURE_EVENTS)
         if (shouldGesturesTriggerActive())
             hitType |= HitTestRequest::ReadOnly;
+#endif
 
         // Increment the platform touch id by 1 to avoid storing a key of 0 in the hashmap.
         unsigned touchPointTargetKey = point.id() + 1;
@@ -3957,8 +3974,13 @@ bool EventHandler::handleTouchEvent(const PlatformTouchEvent& event)
             touchTarget = node;
         } else if (pointState == PlatformTouchPoint::TouchReleased || pointState == PlatformTouchPoint::TouchCancelled) {
             // No need to perform a hit-test since we only need to unset :hover and :active states.
+#if ENABLE(GESTURE_EVENTS)
             if (!shouldGesturesTriggerActive() && allTouchReleased)
                 m_frame->document()->updateHoverActiveState(hitType, 0);
+#else
+            if (allTouchReleased)
+                m_frame->document()->updateHoverActiveState(hitType, 0);
+#endif
             if (touchPointTargetKey == m_originatingTouchPointTargetKey)
                 m_originatingTouchPointTargetKey = 0;
 
