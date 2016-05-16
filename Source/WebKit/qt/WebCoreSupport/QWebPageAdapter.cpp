@@ -40,6 +40,11 @@
 #endif
 #endif
 #include "DocumentLoader.h"
+#if ENABLE(INDEXED_DATABASE)
+#include "DOMWindow.h"
+#include "DOMWindowIndexedDatabase.h"
+#include "IDBFactory.h"
+#endif
 #include "DragClientQt.h"
 #include "DragController.h"
 #include "DragData.h"
@@ -1321,6 +1326,51 @@ void QWebPageAdapter::setSystemTrayIcon(QObject *icon)
 }
 #endif // QT_NO_SYSTEMTRAYICON
 #endif // ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
+
+#if ENABLE(INDEXED_DATABASE)
+bool QWebPageAdapter::deleteAllIndexedDatabases()
+{
+    DOMWindow* domWindow = page->mainFrame()->document()->domWindow();
+    if (!domWindow) {
+        qDebug() << "No IndexedDB factory for given frame found";
+        return false;
+    }
+
+    IDBFactory* idbFactory = DOMWindowIndexedDatabase::indexedDB(domWindow);
+    if (!idbFactory) {
+        qDebug() << "No IndexedDB factory for given frame found";
+        return false;
+    }
+
+    ExceptionCode ec = 0;
+    PassRefPtr<IDBRequest> idbRequest = idbFactory->getDatabaseNames(domWindow->scriptExecutionContext(), ec, true);
+    if (ec) {
+        qDebug() << "Could not obtain database names. Error: " << ec;
+        return false;
+    }
+    ec = 0;
+    RefPtr<IDBAny> requestResult = idbRequest->result(ec);
+    if (ec) {
+        qDebug() << "Could not get result in callback. Error: " << ec;
+        return false;
+    }
+    if (requestResult->type() != IDBAny::DOMStringListType) {
+        qDebug() << "Unexpected result type.";
+        return false;
+    }
+
+    ec = 0;
+    RefPtr<DOMStringList> databaseNamesList = requestResult->domStringList();
+    RefPtr<TypeBuilder::Array<String> > databaseNames = TypeBuilder::Array<String>::create();
+    for (size_t i = 0; i < databaseNamesList->length(); ++i) {
+        idbFactory->deleteDatabase(domWindow->scriptExecutionContext(), databaseNamesList->item(i), ec, true);
+        if (ec) {
+            qDebug() << "Unable to delete IndexedDB with name " << QString(databaseNamesList->item(i));
+        }
+    }
+    return true;
+}
+#endif
 
 #if ENABLE(GEOLOCATION) && HAVE(QTPOSITIONING)
 void QWebPageAdapter::setGeolocationEnabledForFrame(QWebFrameAdapter* frame, bool on)

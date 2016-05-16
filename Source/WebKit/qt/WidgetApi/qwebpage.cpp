@@ -1670,6 +1670,11 @@ bool QWebPage::shouldInterruptJavaScript()
 #endif
 }
 
+bool QWebPage::deleteAllIndexedDatabases()
+{
+    return d->deleteAllIndexedDatabases();
+}
+
 /*!
     \fn void QWebPage::setFeaturePermission(QWebFrame* frame, Feature feature, PermissionPolicy policy)
 

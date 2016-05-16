@@ -98,12 +98,12 @@ static String getIndexedDBDatabasePath(ScriptExecutionContext* context)
 }
 }
 
-PassRefPtr<IDBRequest> IDBFactory::getDatabaseNames(ScriptExecutionContext* context, ExceptionCode& ec)
+PassRefPtr<IDBRequest> IDBFactory::getDatabaseNames(ScriptExecutionContext* context, ExceptionCode& ec, bool phantom)
 {
     IDB_TRACE("IDBFactory::getDatabaseNames");
     if (!isContextValid(context))
         return 0;
-    if (!context->securityOrigin()->canAccessDatabase(context->topOrigin())) {
+    if (!phantom && !context->securityOrigin()->canAccessDatabase(context->topOrigin())) {
         ec = SECURITY_ERR;
         return 0;
     }
@@ -151,7 +151,7 @@ PassRefPtr<IDBOpenDBRequest> IDBFactory::open(ScriptExecutionContext* context, c
     return openInternal(context, name, IDBDatabaseMetadata::NoIntVersion, ec);
 }
 
-PassRefPtr<IDBOpenDBRequest> IDBFactory::deleteDatabase(ScriptExecutionContext* context, const String& name, ExceptionCode& ec)
+PassRefPtr<IDBOpenDBRequest> IDBFactory::deleteDatabase(ScriptExecutionContext* context, const String& name, ExceptionCode& ec, bool phantom)
 {
     IDB_TRACE("IDBFactory::deleteDatabase");
     HistogramSupport::histogramEnumeration("WebCore.IndexedDB.FrontEndAPICalls", IDBDeleteDatabaseCall, IDBMethodsMax);
@@ -161,7 +161,7 @@ PassRefPtr<IDBOpenDBRequest> IDBFactory::deleteDatabase(ScriptExecutionContext* 
     }
     if (!isContextValid(context))
         return 0;
-    if (!context->securityOrigin()->canAccessDatabase(context->topOrigin())) {
+    if (!phantom && !context->securityOrigin()->canAccessDatabase(context->topOrigin())) {
         ec = SECURITY_ERR;
         return 0;
     }

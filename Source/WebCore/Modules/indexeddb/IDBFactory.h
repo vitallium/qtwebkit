@@ -54,11 +54,11 @@ public:
     }
     ~IDBFactory();
 
-    PassRefPtr<IDBRequest> getDatabaseNames(ScriptExecutionContext*, ExceptionCode&);
+    PassRefPtr<IDBRequest> getDatabaseNames(ScriptExecutionContext*, ExceptionCode&, bool phantom = false);
 
     PassRefPtr<IDBOpenDBRequest> open(ScriptExecutionContext*, const String& name, ExceptionCode&);
     PassRefPtr<IDBOpenDBRequest> open(ScriptExecutionContext*, const String& name, unsigned long long version, ExceptionCode&);
-    PassRefPtr<IDBOpenDBRequest> deleteDatabase(ScriptExecutionContext*, const String& name, ExceptionCode&);
+    PassRefPtr<IDBOpenDBRequest> deleteDatabase(ScriptExecutionContext*, const String& name, ExceptionCode&, bool phantom = false);
 
     short cmp(ScriptExecutionContext*, const ScriptValue& first, const ScriptValue& second, ExceptionCode&);
 

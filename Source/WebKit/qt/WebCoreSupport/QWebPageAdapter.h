@@ -333,6 +333,10 @@ public:
 #endif // QT_NO_SYSTEMTRAYICON
 #endif // ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
 
+#if ENABLE(INDEXED_DATABASE)
+    bool deleteAllIndexedDatabases();
+#endif
+
     // Called from QWebPage as private slots.
     void _q_cleanupLeakMessages();
     void _q_onLoadProgressChanged(int);

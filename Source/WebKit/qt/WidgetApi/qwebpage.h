@@ -390,6 +390,8 @@ public:
 
     virtual bool shouldInterruptJavaScript();
 
+    bool deleteAllIndexedDatabases();
+
 Q_SIGNALS:
     void loadStarted();
     void loadProgress(int progress);
