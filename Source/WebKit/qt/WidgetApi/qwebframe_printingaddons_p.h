@@ -34,6 +34,7 @@ class HeaderFooter
 {
 public:
     HeaderFooter(const QWebFrame* frame, QPrinter* printer, QWebFrame::PrintCallback* callback);
+    HeaderFooter(const QWebFrame* frame, QPdfWriter* pdfWriter, QWebFrame::PrintCallback* callback);
     ~HeaderFooter();
 
     void setPageRect(const WebCore::IntRect& rect);
@@ -85,6 +86,51 @@ HeaderFooter::HeaderFooter(const QWebFrame* frame, QPrinter* printer, QWebFrame:
             printer->getPageMargins(&marginLeft, &marginTop, &marginRight, &marginBottom, QPrinter::DevicePixel);
             headerHeightPixel = marginTop - oldMarginTop;
             footerHeightPixel = marginBottom - oldMarginBottom;
+
+            printCtx = new WebCore::PrintContext(QWebFramePrivate::webcoreFrame(page.mainFrame()));
+        }
+    }
+}
+
+HeaderFooter::HeaderFooter(const QWebFrame* frame, QPdfWriter* pdfWriter, QWebFrame::PrintCallback* callback_)
+: printCtx(0)
+, callback(callback_)
+, headerHeightPixel(0)
+, footerHeightPixel(0)
+{
+    if (callback) {
+        qreal headerHeight = qMax(qreal(0), callback->headerHeight());
+        qreal footerHeight = qMax(qreal(0), callback->footerHeight());
+
+        if (headerHeight || footerHeight) {
+            // figure out the header/footer height in pixels from the pdfWriter->resolution()
+            // based on the height given in *Points*
+
+            // get the existing margins in pixels
+            qreal pdfWriterResolution = pdfWriter->resolution();
+            QMargins marginsInPixels = pdfWriter->pageLayout().marginsPixels(pdfWriterResolution);
+            const qreal marginTopInPixels = marginsInPixels.top();
+            const qreal marginBottomInPixels = marginsInPixels.bottom();
+
+            // get the margins in points
+            QMargins marginsInPoints = pdfWriter->pageLayout().marginsPoints();
+            // set and mutate the margins to include the headerHeight and footerHeight
+            pdfWriter->setPageMargins(QMarginsF(
+                marginsInPoints.left(),
+                marginsInPoints.top() + headerHeight,
+                marginsInPoints.right(),
+                marginsInPoints.bottom() + footerHeight
+            ), QPageLayout::Point);
+
+            // get the margins in pixels again
+            QMargins marginsInPixelsWithHeaderFooterHeights = pdfWriter->pageLayout(
+            ).marginsPixels(pdfWriterResolution);
+            const qreal marginTopInPixelsWithHeader = marginsInPixelsWithHeaderFooterHeights.top();
+            const qreal marginBottomInPixelsWithFooter = marginsInPixelsWithHeaderFooterHeights.bottom();
+
+            // calculate the header footer height in pixels
+            headerHeightPixel = marginTopInPixelsWithHeader - marginTopInPixels;
+            footerHeightPixel = marginBottomInPixelsWithFooter - marginBottomInPixels;
 
             printCtx = new WebCore::PrintContext(QWebFramePrivate::webcoreFrame(page.mainFrame()));
         }

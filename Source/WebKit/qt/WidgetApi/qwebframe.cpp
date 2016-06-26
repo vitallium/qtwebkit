@@ -830,6 +830,55 @@ void QWebFrame::print(QPrinter *printer) const
     print(printer, 0);
 }
 
+void QWebFrame::print(QPdfWriter *pdfWriter, PrintCallback *callback) const
+{
+    QPainter painter;
+
+    HeaderFooter headerFooter(this, pdfWriter, callback);
+
+    if (!painter.begin(pdfWriter))
+        return;
+    
+    qreal pdfWriterResolution = pdfWriter->resolution();
+    QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriterResolution);
+
+    QtPrintContext printContext(&painter, pageRect, d);
+
+    // TODO: add painter scaling and zoom support
+    // the normal print method scales the painter like so:
+
+    // painter.scale(zoomFactorX, zoomFactorY);
+
+    // but the current phantomJS (at this time, 2.1)
+    // doesn't support page.zoomFactor on PDFs anyway
+
+    int lastPage = printContext.pageCount() - 1;
+    // indexing should start a 1 for header and footer page number logic
+    for (int page = 0; page < printContext.pageCount(); page++) {
+        if (headerFooter.isValid()) {
+            // print header/footer
+
+            // QPdfWriter doesn't support collateCopies() or numCopies() 
+            // so there is no need to call d->frame->getPagination(...)
+            headerFooter.paintHeader(
+                printContext.graphicsContext(),
+                pageRect,
+                page + 1, // logical page is one more than the index
+                printContext.pageCount()
+            );
+            
+            headerFooter.paintFooter(
+                printContext.graphicsContext(),
+                pageRect,
+                page + 1,
+                printContext.pageCount()
+            );
+        }
+        printContext.spoolPage(page, pageRect.width());
+        if (page != lastPage) pdfWriter->newPage();
+    }
+}
+
 void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
 {
 #if HAVE(QTPRINTSUPPORT)
