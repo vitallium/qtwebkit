@@ -838,22 +838,19 @@ void QWebFrame::print(QPdfWriter *pdfWriter, PrintCallback *callback) const
 
     if (!painter.begin(pdfWriter))
         return;
+
+    // calculate zoomFactors (see QWebFrame::print(QPrinter...))
+    const qreal zoomFactorX = (qreal)pdfWriter->logicalDpiX() / pdfWriter->resolution();
+    const qreal zoomFactorY = (qreal)pdfWriter->logicalDpiY() / pdfWriter->resolution();
     
     qreal pdfWriterResolution = pdfWriter->resolution();
-    QRect pageRect = pdfWriter->pageLayout().paintRectPixels(pdfWriterResolution);
+    QRect qpdfWriterRect = pdfWriter->pageLayout().paintRectPixels(pdfWriterResolution);
+    QRect pageRect(0, 0, int(qpdfWriterRect.width() / zoomFactorX), int(qpdfWriterRect.height() / zoomFactorY));
+
 
     QtPrintContext printContext(&painter, pageRect, d);
 
-    // TODO: add painter scaling and zoom support
-    // the normal print method scales the painter like so:
-
-    // painter.scale(zoomFactorX, zoomFactorY);
-
-    // but the current phantomJS (at this time, 2.1)
-    // doesn't support page.zoomFactor on PDFs anyway
-
     int lastPage = printContext.pageCount() - 1;
-    // indexing should start a 1 for header and footer page number logic
     for (int page = 0; page < printContext.pageCount(); page++) {
         if (headerFooter.isValid()) {
             // print header/footer
