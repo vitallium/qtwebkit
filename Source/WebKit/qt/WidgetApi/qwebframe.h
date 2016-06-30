@@ -27,6 +27,7 @@
 #include <QtGui/qicon.h>
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include <QtWebKit/qwebkitglobal.h>
+#include <QPagedPaintDevice>
 
 QT_BEGIN_NAMESPACE
 class QRect;
