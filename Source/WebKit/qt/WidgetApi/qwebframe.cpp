@@ -937,7 +937,7 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     if (!painter.begin(pagedPaintDevice))
         return;
     
-    QRect pageRect = pagedPaintDevice->paintRectPixels(pagedPaintDevice->logicalDpiX());
+    QRect pageRect = pagedPaintDevice->pageLayout().paintRectPixels(pagedPaintDevice->logicalDpiX());
 
     QtPrintContext printContext(&painter, pageRect, d);
     int lastPage = printContext.pageCount() - 1;
