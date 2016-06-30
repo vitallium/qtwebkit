@@ -226,6 +226,8 @@ public Q_SLOTS:
     void print(QPrinter *printer) const;
     void print(QPrinter *printer, PrintCallback *callback) const;
 #endif
+    void renderPaged(QPagedPaintDevice *pagedPaintDevice) const;
+    void renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *callback) const; 
 
 Q_SIGNALS:
     void javaScriptWindowObjectCleared();

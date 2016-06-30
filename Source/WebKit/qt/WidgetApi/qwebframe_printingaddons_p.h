@@ -33,7 +33,7 @@
 class HeaderFooter
 {
 public:
-    HeaderFooter(const QWebFrame* frame, QPrinter* printer, QWebFrame::PrintCallback* callback);
+    HeaderFooter(const QWebFrame* frame, QPagedPaintDevice* pagedPaintDevice, QWebFrame::PrintCallback* callback_);
     ~HeaderFooter();
 
     void setPageRect(const WebCore::IntRect& rect);
@@ -56,39 +56,50 @@ private:
     void paint(WebCore::GraphicsContext& ctx, const WebCore::IntRect& pageRect, const QString& contents, int height);
 };
 
-HeaderFooter::HeaderFooter(const QWebFrame* frame, QPrinter* printer, QWebFrame::PrintCallback* callback_)
+HeaderFooter::HeaderFooter(const QWebFrame* frame, QPagedPaintDevice* pagedPaintDevice, QWebFrame::PrintCallback* callback_)
 : printCtx(0)
 , callback(callback_)
 , headerHeightPixel(0)
 , footerHeightPixel(0)
 {
-    if (callback) {
-        qreal headerHeight = qMax(qreal(0), callback->headerHeight());
-        qreal footerHeight = qMax(qreal(0), callback->footerHeight());
+    if (!callback)
+        return;
+    
 
-        if (headerHeight || footerHeight) {
-            // figure out the header/footer height in *DevicePixel*
-            // based on the height given in *Points*
-            qreal marginLeft, marginRight, marginTop, marginBottom;
-            // find existing margins
-            printer->getPageMargins(&marginLeft, &marginTop, &marginRight, &marginBottom, QPrinter::DevicePixel);
-            const qreal oldMarginTop = marginTop;
-            const qreal oldMarginBottom = marginBottom;
+    qreal headerHeightPoints = qMax(qreal(0), callback->headerHeight());
+    qreal footerHeightPoints = qMax(qreal(0), callback->footerHeight());
 
-            printer->getPageMargins(&marginLeft, &marginTop, &marginRight, &marginBottom, QPrinter::Point);
-            // increase margins to hold header+footer
-            marginTop += headerHeight;
-            marginBottom += footerHeight;
-            printer->setPageMargins(marginLeft, marginTop, marginRight, marginBottom, QPrinter::Point);
+    if (!headerHeightPoints && !footerHeightPoints)
+        return;
 
-            // calculate actual heights
-            printer->getPageMargins(&marginLeft, &marginTop, &marginRight, &marginBottom, QPrinter::DevicePixel);
-            headerHeightPixel = marginTop - oldMarginTop;
-            footerHeightPixel = marginBottom - oldMarginBottom;
+    // -- gets the margins in pixels by using the device's logical dpi --
+    // in both QPdfWriter and QPrinter, logicalDpiX() is the same as resolution() for PDFs
+    // see QPdfEngine::metric() and QPdfPrintEngine::metric()
+    // with case QPaintDevice::PdmDpiX in qtbase
+    QMargins marginsPixels = pagedPaintDevice->pageLayout().marginsPixels(
+        pagedPaintDevice->logicalDpiX());
 
-            printCtx = new WebCore::PrintContext(QWebFramePrivate::webcoreFrame(page.mainFrame()));
-        }
-    }
+    const int marginTopNoHeaderPixels = marginsPixels.top();
+    const int marginBottomNoFooterPixels = marginsPixels.bottom();
+
+    QMargins marginsPoints = pagedPaintDevice->pageLayout().marginsPoints();
+
+    const int marginLeftPoints = marginsPoints.left();
+    const int marginTopHeaderPoints = marginsPoints.top() + headerHeightPoints;
+    const int marginRightPoints = marginsPoints.right();
+    const int marginBottomFooterPoints = marginsPoints.bottom() + footerHeightPoints;
+    
+    pagedPaintDevice->setPageMargins(
+        QMarginsF(marginLeftPoints, marginTopHeaderPoints, marginRightPoints, marginBottomFooterPoints),
+        QPageLayout::Point);
+
+    QMargins marginsPixelsHeaderFooter = pagedPaintDevice->pageLayout().marginsPixels(
+        pagedPaintDevice->logicalDpiX());
+
+    headerHeightPixel = marginsPixelsHeaderFooter.top() - marginTopNoHeaderPixels;
+    footerHeightPixel = marginsPixelsHeaderFooter.bottom() - marginBottomNoFooterPixels;
+
+    printCtx = new WebCore::PrintContext(QWebFramePrivate::webcoreFrame(page.mainFrame()));
 }
 
 HeaderFooter::~HeaderFooter()

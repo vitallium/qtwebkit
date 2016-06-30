@@ -923,6 +923,41 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
 }
 #endif // QT_NO_PRINTER
 
+void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice) const
+{
+    renderPaged(pagedPaintDevice, 0);
+}
+
+void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *callback) const
+{
+    QPainter painter;
+
+    HeaderFooter headerFooter(this, pagedPaintDevice, callback);
+
+    if (!painter.begin(pagedPaintDevice))
+        return;
+    
+    QRect pageRect = pagedPaintDevice->paintRectPixels(pagedPaintDevice->logicalDpiX());
+
+    QtPrintContext printContext(&painter, pageRect, d);
+    int lastPage = printContext.pageCount() - 1;
+    for (int page = 0; page < printContext.pageCount(); page++) {
+        if (headerFooter.isValid()) {
+
+            // QPdfWriter doesn't support collateCopies() or numCopies() 
+            // so there is no need to call d->frame->getPagination(...)
+            // print header/footer
+            headerFooter.paintHeader(printContext.graphicsContext(), pageRect,
+                page + 1, printContext.pageCount());
+            
+            headerFooter.paintFooter(printContext.graphicsContext(), pageRect,
+                page + 1, printContext.pageCount() );
+        }
+        printContext.spoolPage(page, pageRect.width());
+        if (page != lastPage) pdfWriter->newPage();
+    }
+}
+
 /*!
     Evaluates the JavaScript defined by \a scriptSource using this frame as context
     and returns the result of the last executed statement.
