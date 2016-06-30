@@ -944,7 +944,7 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     for (int page = 0; page < printContext.pageCount(); page++) {
         if (headerFooter.isValid()) {
 
-            // QPdfWriter doesn't support collateCopies() or numCopies() 
+            // QPagedPaintDevice doesn't support collateCopies() or numCopies() 
             // so there is no need to call d->frame->getPagination(...)
             // print header/footer
             headerFooter.paintHeader(printContext.graphicsContext(), pageRect,
@@ -954,7 +954,7 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
                 page + 1, printContext.pageCount() );
         }
         printContext.spoolPage(page, pageRect.width());
-        if (page != lastPage) pdfWriter->newPage();
+        if (page != lastPage) pagedPaintDevice->newPage();
     }
 }
 
