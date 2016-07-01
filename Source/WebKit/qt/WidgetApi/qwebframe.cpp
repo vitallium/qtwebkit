@@ -942,6 +942,7 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     QtPrintContext printContext(&painter, pageRect, d);
     int lastPage = printContext.pageCount() - 1;
     for (int page = 0; page < printContext.pageCount(); page++) {
+        printContext.spoolPage(page, pageRect.width());
         if (headerFooter.isValid()) {
 
             // QPagedPaintDevice doesn't support collateCopies() or numCopies() 
@@ -953,7 +954,6 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
             headerFooter.paintFooter(printContext.graphicsContext(), pageRect,
                 page + 1, printContext.pageCount() );
         }
-        printContext.spoolPage(page, pageRect.width());
         if (page != lastPage) pagedPaintDevice->newPage();
     }
 }
