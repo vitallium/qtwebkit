@@ -734,7 +734,9 @@ void QNetworkReplyHandler::clearContentHeaders()
     // Clearing Content-length and Content-type of the requests that do not have contents.
     // This is necessary to ensure POST requests redirected to GETs do not leak metadata
     // about the POST content to the site they've been redirected to.
-    m_request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant());
+    if (m_request.header(QNetworkRequest::ContentTypeHeader).toString().indexOf("application/json") < 0) {
+        m_request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant());
+    }
     m_request.setHeader(QNetworkRequest::ContentLengthHeader, QVariant());
 }
 
