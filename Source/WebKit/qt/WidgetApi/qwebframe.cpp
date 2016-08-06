@@ -840,8 +840,8 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
     if (!painter.begin(printer))
         return;
 
-    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / printer->resolution();
-    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / printer->resolution();
+    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / qt_defaultDpi();
+    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / qt_defaultDpi();
 
     QRect qprinterRect = printer->pageRect();
 
@@ -937,9 +937,16 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     if (!painter.begin(pagedPaintDevice))
         return;
     
-    QRect pageRect = pagedPaintDevice->pageLayout().paintRectPixels(pagedPaintDevice->logicalDpiX());
+    const qreal zoomFactorX = (qreal)pagedPaintDevice->logicalDpiX() / qt_defaultDpi();
+    const qreal zoomFactorY = (qreal)pagedPaintDevice->logicalDpiY() / qt_defaultDpi();
+    
+    // similar to qprinterRect from ::print(...)
+    QRect unscaledRect = pagedPaintDevice->pageLayout().paintRectPixels(pagedPaintDevice->logicalDpiX());
+    QRect pageRect(0, 0, int(unscaledRect.width() / zoomFactorX), int(unscaledRect.height() / zoomFactorY));
 
     QtPrintContext printContext(&painter, pageRect, d);
+    painter.scale(zoomFactorX, zoomFactorY);
+    
     int lastPage = printContext.pageCount() - 1;
     for (int page = 0; page < printContext.pageCount(); page++) {
         if (headerFooter.isValid()) {
