@@ -840,8 +840,12 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
     if (!painter.begin(printer))
         return;
 
-    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / printer->resolution();
-    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / printer->resolution();
+    // the logical DPI of the printer can vary between 72 and 96 px on unix and windows respectively
+    // however chrome and other browsers seem to print at 96 dpi no matter the system so scaling the
+    // painter by the logicalDpi/96 gives us a consistent size
+    // for issue https://github.com/ariya/phantomjs/issues/12685
+    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / 96.0;
+    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / 96.0;
 
     QRect qprinterRect = printer->pageRect();
 
@@ -922,6 +926,52 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
 #endif // HAVE(PRINTSUPPORT)
 }
 #endif // QT_NO_PRINTER
+
+void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice) const
+{
+    renderPaged(pagedPaintDevice, 0);
+}
+
+void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *callback) const
+{
+    QPainter painter;
+
+    HeaderFooter headerFooter(this, pagedPaintDevice, callback);
+
+    if (!painter.begin(pagedPaintDevice))
+        return;
+    
+    // the logical DPI of the printer can vary between 72 and 96 px on unix and windows respectively
+    // however chrome and other browsers seem to print at 96 dpi no matter the system so scaling the
+    // painter by the logicalDpi/96 gives us a consistent size
+    // for issue https://github.com/ariya/phantomjs/issues/12685
+    const qreal zoomFactorX = (qreal)pagedPaintDevice->logicalDpiX() / 96.0;
+    const qreal zoomFactorY = (qreal)pagedPaintDevice->logicalDpiY() / 96.0;
+    
+    // similar to qprinterRect from ::print(...)
+    QRect unscaledRect = pagedPaintDevice->pageLayout().paintRectPixels(pagedPaintDevice->logicalDpiX());
+    QRect pageRect(0, 0, int(unscaledRect.width() / zoomFactorX), int(unscaledRect.height() / zoomFactorY));
+
+    QtPrintContext printContext(&painter, pageRect, d);
+    painter.scale(zoomFactorX, zoomFactorY);
+    
+    int lastPage = printContext.pageCount() - 1;
+    for (int page = 0; page < printContext.pageCount(); page++) {
+        if (headerFooter.isValid()) {
+
+            // QPagedPaintDevice doesn't support collateCopies() or numCopies() 
+            // so there is no need to call d->frame->getPagination(...)
+            // print header/footer
+            headerFooter.paintHeader(printContext.graphicsContext(), pageRect,
+                page + 1, printContext.pageCount());
+            
+            headerFooter.paintFooter(printContext.graphicsContext(), pageRect,
+                page + 1, printContext.pageCount() );
+        }
+        printContext.spoolPage(page, pageRect.width());
+        if (page != lastPage) pagedPaintDevice->newPage();
+    }
+}
 
 /*!
     Evaluates the JavaScript defined by \a scriptSource using this frame as context

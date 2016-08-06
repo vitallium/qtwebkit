@@ -27,6 +27,7 @@
 #include <QtGui/qicon.h>
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include <QtWebKit/qwebkitglobal.h>
+#include <QPagedPaintDevice>
 
 QT_BEGIN_NAMESPACE
 class QRect;
@@ -226,6 +227,8 @@ public Q_SLOTS:
     void print(QPrinter *printer) const;
     void print(QPrinter *printer, PrintCallback *callback) const;
 #endif
+    void renderPaged(QPagedPaintDevice *pagedPaintDevice) const;
+    void renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *callback) const; 
 
 Q_SIGNALS:
     void javaScriptWindowObjectCleared();
