@@ -840,8 +840,8 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
     if (!painter.begin(printer))
         return;
 
-    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / qt_defaultDpi();
-    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / qt_defaultDpi();
+    const qreal zoomFactorX = (qreal)printer->logicalDpiX() / printer->physicalDpiX();
+    const qreal zoomFactorY = (qreal)printer->logicalDpiY() / printer->physicalDpiY();
 
     QRect qprinterRect = printer->pageRect();
 
@@ -937,8 +937,8 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     if (!painter.begin(pagedPaintDevice))
         return;
     
-    const qreal zoomFactorX = (qreal)pagedPaintDevice->logicalDpiX() / qt_defaultDpi();
-    const qreal zoomFactorY = (qreal)pagedPaintDevice->logicalDpiY() / qt_defaultDpi();
+    const qreal zoomFactorX = (qreal)pagedPaintDevice->logicalDpiX() / pagedPaintDevice->physicalDpiX();
+    const qreal zoomFactorY = (qreal)pagedPaintDevice->logicalDpiY() / pagedPaintDevice->physicalDpiY();
     
     // similar to qprinterRect from ::print(...)
     QRect unscaledRect = pagedPaintDevice->pageLayout().paintRectPixels(pagedPaintDevice->logicalDpiX());
