@@ -840,6 +840,10 @@ void QWebFrame::print(QPrinter *printer, PrintCallback *callback) const
     if (!painter.begin(printer))
         return;
 
+    // the logical DPI of the printer can vary between 72 and 96 px on unix and windows respectively
+    // however chrome and other browsers seem to print at 96 dpi no matter the system so scaling the
+    // painter by the logicalDpi/96 gives us a consistent size
+    // for issue https://github.com/ariya/phantomjs/issues/12685
     const qreal zoomFactorX = (qreal)printer->logicalDpiX() / 96.0;
     const qreal zoomFactorY = (qreal)printer->logicalDpiY() / 96.0;
 
@@ -937,7 +941,10 @@ void QWebFrame::renderPaged(QPagedPaintDevice *pagedPaintDevice, PrintCallback *
     if (!painter.begin(pagedPaintDevice))
         return;
     
-    // just hard code it to 96
+    // the logical DPI of the printer can vary between 72 and 96 px on unix and windows respectively
+    // however chrome and other browsers seem to print at 96 dpi no matter the system so scaling the
+    // painter by the logicalDpi/96 gives us a consistent size
+    // for issue https://github.com/ariya/phantomjs/issues/12685
     const qreal zoomFactorX = (qreal)pagedPaintDevice->logicalDpiX() / 96.0;
     const qreal zoomFactorY = (qreal)pagedPaintDevice->logicalDpiY() / 96.0;
     
