@@ -238,9 +238,19 @@ void ImageLoader::updateFromElement()
         }
 
         m_image = newImage;
-        m_hasPendingBeforeLoadEvent = !m_element->document()->isImageDocument() && newImage;
-        m_hasPendingLoadEvent = newImage;
-        m_imageComplete = !newImage;
+
+        // Don't set m_hasPendingLoadEvent to true if autoLoadImages() is false as it causes memory leaks.
+        // updatedHasPendingEvent() will add an extra ref to m_element to prevent it from going
+        // away before the load event has been dispatched. But if autoLoadImages() is false there will
+        // not be any load event, so the protection ref never gets removed. This results in both the
+        // the HTMLImageElement and its never-loaded CachedImage to leak.
+        // https://bugs.webkit.org/show_bug.cgi?id=17469
+        // https://bugreports.qt.io/browse/QTBUG-38857
+        // https://github.com/ariya/phantomjs/issues/12903
+        // FIXME: Should the beforeLoadEvent be sent even if not autoLoadImages()?
+        m_hasPendingBeforeLoadEvent = !m_element->document()->isImageDocument() && m_element->document()->cachedResourceLoader()->autoLoadImages() && newImage;
+        m_hasPendingLoadEvent = m_element->document()->cachedResourceLoader()->autoLoadImages() && newImage;
+        m_imageComplete = !m_hasPendingLoadEvent;
 
         if (newImage) {
             if (!m_element->document()->isImageDocument()) {
