@@ -103,7 +103,6 @@ void ARC4RandomNumberGenerator::stir()
     // Discard early keystream, as per recommendations in:
     // As per the Network Operations Division, cryptographic requirements
     // published on wikileaks on March 2017.
-    
     for (int i = 0; i < 3072; i++)
         getByte();
     m_count = 1600000;
