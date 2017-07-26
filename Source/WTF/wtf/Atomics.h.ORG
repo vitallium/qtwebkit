@@ -75,7 +75,6 @@ extern "C" void _ReadWriteBarrier(void);
 #elif OS(ANDROID)
 #include <sys/atomics.h>
 #endif
-#include "iostream"
 
 namespace WTF {
 
@@ -222,7 +221,6 @@ inline void compilerFence()
 #if OS(WINDOWS) && !COMPILER(GCC)
     _ReadWriteBarrier();
 #else
-std::cout << ">>> ATUL: in compilerFence" << std::endl;
     asm volatile("" ::: "memory");
 #endif
 }
