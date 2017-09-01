@@ -82,7 +82,7 @@ public:
         ASSERT(isPageAligned(size));
         ASSERT(contains(start, size));
 
-std::cout << ">>> ATUL: start = " << start << ", size = " << size << std::endl;
+std::cerr << ">>> ATUL: start = " << start << ", size = " << size << std::endl;
         m_committed += size;
         OSAllocator::commit(start, size, m_writable, m_executable);
     }

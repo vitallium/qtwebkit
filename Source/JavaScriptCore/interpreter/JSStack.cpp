@@ -71,7 +71,7 @@ bool JSStack::growSlowCase(Register* newEnd)
 {
     // If we have already committed enough memory to satisfy this request,
     // just update the end pointer and return.
-std::cout << ">>> ATUL: newEnd = " << newEnd << ", m_commitEnd = " << m_commitEnd << std::endl;
+std::cerr << ">>> ATUL: newEnd = " << newEnd << ", m_commitEnd = " << m_commitEnd << std::endl;
     if (newEnd <= m_commitEnd) {
         m_end = newEnd;
         return true;
@@ -86,11 +86,11 @@ std::cout << ">>> ATUL: newEnd = " << newEnd << ", m_commitEnd = " << m_commitEn
 
     // Otherwise, the growth is still within our budget. Go ahead and commit
     // it and return true.
-std::cout << ">>> ATUL: committing more memory, diff = " << (newEnd - m_commitEnd) << ", commitSize = " << commitSize << ", delta = " << delta << std::endl;
+std::cerr << ">>> ATUL: committing more memory, diff = " << (newEnd - m_commitEnd) << ", commitSize = " << commitSize << ", delta = " << delta << std::endl;
     m_reservation.commit(m_commitEnd, delta);
     addToCommittedByteCount(delta);
     m_commitEnd = reinterpret_cast_ptr<Register*>(reinterpret_cast<char*>(m_commitEnd) + delta);
-std::cout << ">>> ATUL: new m_commitEnd = " << m_commitEnd << std::endl;
+std::cerr << ">>> ATUL: new m_commitEnd = " << m_commitEnd << std::endl;
     m_end = newEnd;
     return true;
 }

@@ -82,7 +82,7 @@ static const unsigned jitAllocationGranule = 32;
 inline size_t roundUpAllocationSize(size_t request, size_t granularity)
 {
     RELEASE_ASSERT((std::numeric_limits<size_t>::max() - granularity) > request);
-std::cout << ">>> ATUL: inside roundUpAllocationSize" << std::endl;
+std::cerr << ">>> ATUL: inside roundUpAllocationSize" << std::endl;
     
     // Round up to next page boundary
     size_t size = request + (granularity - 1);

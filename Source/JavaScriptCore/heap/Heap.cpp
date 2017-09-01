@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <wtf/RAMSize.h>
 #include <wtf/CurrentTime.h>
+#include <iostream>
 
 using namespace std;
 using namespace JSC;
@@ -50,8 +51,12 @@ namespace JSC {
 
 namespace { 
 
-static const size_t largeHeapSize = 32 * MB; // About 1.5X the average webpage.
-static const size_t smallHeapSize = 1 * MB; // Matches the FastMalloc per-thread cache.
+//static const size_t largeHeapSize = 32 * MB; // About 1.5X the average webpage.
+//static const size_t smallHeapSize = 1 * MB; // Matches the FastMalloc per-thread cache.
+// ATUL
+static const size_t largeHeapSize = 64* 32 * MB; // About 1.5X the average webpage.
+static const size_t smallHeapSize = 16* 1 * MB; // Matches the FastMalloc per-thread cache.
+// ATUL
 
 #if ENABLE(GC_LOGGING)
 #if COMPILER(CLANG)
@@ -445,6 +450,7 @@ void Heap::markRoots()
         m_machineThreads.gatherConservativeRoots(machineThreadRoots, &dummy);
     }
 
+std::cout << "ATUL>>> clearing stackRoots" << std::endl;
     ConservativeRoots stackRoots(&m_objectSpace.blocks(), &m_storageSpace);
     m_dfgCodeBlocks.clearMarks();
     {
@@ -489,6 +495,7 @@ void Heap::markRoots()
             visitor.donateAndDrain();
         }
         {
+std::cout << "ATUL>> donating stackRoots" << std::endl;
             GCPHASE(VisitStackRoots);
             MARK_LOG_ROOT(visitor, "Stack");
             visitor.append(stackRoots);
@@ -503,10 +510,12 @@ void Heap::markRoots()
         }
 #endif
         {
+std::cout << "ATUL>> donating heapRoots" << std::endl;
             GCPHASE(VisitProtectedObjects);
             MARK_LOG_ROOT(visitor, "Protected Objects");
             markProtectedObjects(heapRootVisitor);
             visitor.donateAndDrain();
+std::cout << "ATUL>> completed donating heapRoots" << std::endl;
         }
         {
             GCPHASE(VisitTempSortVectors);
@@ -524,6 +533,7 @@ void Heap::markRoots()
             }
         }
         if (m_vm->exception) {
+std::cout << "ATUL>> in vm exception" << std::endl;
             GCPHASE(MarkingException);
             MARK_LOG_ROOT(visitor, "Exceptions");
             heapRootVisitor.visit(&m_vm->exception);

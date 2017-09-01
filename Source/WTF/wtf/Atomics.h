@@ -222,7 +222,7 @@ inline void compilerFence()
 #if OS(WINDOWS) && !COMPILER(GCC)
     _ReadWriteBarrier();
 #else
-std::cout << ">>> ATUL: in compilerFence" << std::endl;
+std::cerr << ">>> ATUL: in compilerFence" << std::endl;
     asm volatile("" ::: "memory");
 #endif
 }
