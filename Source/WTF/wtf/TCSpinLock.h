@@ -38,6 +38,7 @@
 #if OS(UNIX)
 #include <sched.h>
 #endif
+#include "iostream"
 
 #if ENABLE(COMPARE_AND_SWAP)
 
@@ -46,6 +47,7 @@ static void TCMalloc_SlowLock(unsigned* lockword);
 // The following is a struct so that it can be initialized at compile time
 struct TCMalloc_SpinLock {
     void Lock() {
+std::cerr << "ATUL>>> TCMalloc_SpinLock::Lock() calling weakCompareAndSwapUIntPtr" << std::endl;
       if (!WTF::weakCompareAndSwap(&lockword_, 0, 1))
         TCMalloc_SlowLock(&lockword_);
       WTF::memoryBarrierAfterLock();
@@ -73,6 +75,7 @@ struct TCMalloc_SpinLock {
 #define SPINLOCK_INITIALIZER { 0 }
 
 static void TCMalloc_SlowLock(unsigned* lockword) {
+std::cerr << "ATUL>>> TCMalloc_SlowLock calling weakCompareAndSwapUIntPtr" << std::endl;
   do {
 #if OS(WINDOWS)
     Sleep(0);

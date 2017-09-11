@@ -13,6 +13,7 @@
 #include "JSString.h"
 #include "Operations.h"
 #include <wtf/StackStats.h>
+#include "iostream"
 
 namespace JSC {
 
@@ -243,6 +244,7 @@ void SlotVisitor::mergeOpaqueRoots()
 
 ALWAYS_INLINE bool JSString::tryHashConsLock()
 {
+std::cerr << "ATUL>>> in JSString::tryHashConsLock" << std::endl;
 #if ENABLE(PARALLEL_GC)
     unsigned currentFlags = m_flags;
 
@@ -251,6 +253,7 @@ ALWAYS_INLINE bool JSString::tryHashConsLock()
 
     unsigned newFlags = currentFlags | HashConsLock;
 
+std::cerr << "ATUL>>> JSString::tryHashConsLock calling weakCompareAndSwap" << std::endl;
     if (!WTF::weakCompareAndSwap(&m_flags, currentFlags, newFlags))
         return false;
 

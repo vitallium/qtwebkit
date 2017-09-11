@@ -159,6 +159,7 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
 #elif CPU(ARM_THUMB2)
     unsigned tmp;
     unsigned result;
+std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled" << std::endl;
     asm volatile(
         "movw %1, #1\n\t"
         "ldrex %2, %0\n\t"
@@ -175,6 +176,7 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
 #endif
     return result;
 #else
+std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
     UNUSED_PARAM(newValue);

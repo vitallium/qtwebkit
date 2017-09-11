@@ -24,6 +24,7 @@
 #include <wtf/StdLibExtras.h>
 #include <stdint.h>
 #include <string.h>
+#include "iostream"
 
 namespace WTF {
 
@@ -122,6 +123,7 @@ inline bool Bitmap<size, atomicMode>::concurrentTestAndSet(size_t n)
     size_t index = n / wordSize;
     WordType* wordPtr = bits.data() + index;
     WordType oldValue;
+std::cerr << "ATUL>>> Bitmap 1 calling weakCompareAndSwapUIntPtr" << std::endl;
     do {
         oldValue = *wordPtr;
         if (oldValue & mask)
@@ -142,6 +144,7 @@ inline bool Bitmap<size, atomicMode>::concurrentTestAndClear(size_t n)
     size_t index = n / wordSize;
     WordType* wordPtr = bits.data() + index;
     WordType oldValue;
+std::cerr << "ATUL>>> Bitmap 2 calling weakCompareAndSwapUIntPtr" << std::endl;
     do {
         oldValue = *wordPtr;
         if (!(oldValue & mask))

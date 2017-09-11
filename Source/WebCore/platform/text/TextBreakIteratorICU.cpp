@@ -26,6 +26,7 @@
 #include "LineBreakIteratorPoolICU.h"
 #include <wtf/Atomics.h>
 #include <wtf/text/WTFString.h>
+#include "iostream"
 
 using namespace WTF;
 using namespace std;
@@ -495,6 +496,7 @@ static TextBreakIterator* nonSharedCharacterBreakIterator;
 static inline bool compareAndSwapNonSharedCharacterBreakIterator(TextBreakIterator* expected, TextBreakIterator* newValue)
 {
 #if ENABLE(COMPARE_AND_SWAP)
+std::cerr << "ATUL>>> compareAndSwapNonSharedCharacterBreakIterator calling weakCompareAndSwapUIntPtr" << std::endl;
     return weakCompareAndSwap(reinterpret_cast<void**>(&nonSharedCharacterBreakIterator), expected, newValue);
 #else
     DEFINE_STATIC_LOCAL(Mutex, nonSharedCharacterBreakIteratorMutex, ());
