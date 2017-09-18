@@ -251,6 +251,23 @@ inline void storeStoreFence() { armV7_dmb_st(); }
 inline void memoryBarrierAfterLock() { armV7_dmb(); }
 inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
 
+/* ATUL */
+#elif CPU(WTF_CPU_PPC64) && !defined(WTF_CPU_BIG_ENDIAN)
+#warning "ATUL>>> Using ppc64le code for fencing"
+inline void ppc64le_dmb()
+{
+std::cerr << ">>> ATUL: in ppc64le equiv. compilerFence" << std::endl;
+    asm volatile("lwsync" ::: "memory");
+}
+
+inline void loadLoadFence() { ppc64le_dmb(); }
+inline void loadStoreFence() { ppc64le_dmb(); }
+inline void storeLoadFence() { ppc64le_dmb(); }
+inline void storeStoreFence() { ppc64le_dmb(); }
+inline void memoryBarrierAfterLock() { ppc64le_dmb(); }
+inline void memoryBarrierBeforeUnlock() { ppc64le_dmb(); }
+
+/* ATUL */
 #elif CPU(X86) || CPU(X86_64)
 
 inline void x86_mfence()
@@ -274,6 +291,7 @@ inline void memoryBarrierAfterLock() { compilerFence(); }
 inline void memoryBarrierBeforeUnlock() { compilerFence(); }
 
 #else
+#warning "ATUL>>> Using generic code for fencing"
 
 inline void loadLoadFence() { compilerFence(); }
 inline void loadStoreFence() { compilerFence(); }

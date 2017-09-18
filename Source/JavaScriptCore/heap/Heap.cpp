@@ -478,6 +478,7 @@ std::cout << "ATUL>>> clearing stackRoots" << std::endl;
     HeapRootVisitor heapRootVisitor(visitor);
 
     {
+        // ATUL:
         ParallelModeEnabler enabler(visitor);
 
         if (m_vm->codeBlocksBeingCompiled.size()) {
@@ -581,6 +582,7 @@ std::cout << "ATUL>> in vm exception" << std::endl;
             if (visitor.isEmpty())
                 break;
             {
+                // ATUL:
                 ParallelModeEnabler enabler(visitor);
                 visitor.donateAndDrain();
 #if ENABLE(PARALLEL_GC)

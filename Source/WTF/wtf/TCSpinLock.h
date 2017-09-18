@@ -100,6 +100,7 @@ struct TCMalloc_SpinLock {
     if (pthread_mutex_destroy(&private_lock_) != 0) CRASH();
   }
   inline void Lock() {
+std::cerr << "ATUL>>> Came to pthread section, TCMalloc_SpinLock::Lock() calling pthread_mutex_lock" << std::endl;
     if (pthread_mutex_lock(&private_lock_) != 0) CRASH();
   }
   inline void Unlock() {
