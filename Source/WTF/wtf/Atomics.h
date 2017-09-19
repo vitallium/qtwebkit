@@ -159,7 +159,21 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
 #elif CPU(ARM_THUMB2)
     unsigned tmp;
     unsigned result;
-std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled" << std::endl;
+    asm volatile(
+        "movw %1, #1\n\t"
+        "ldrex %2, %0\n\t"
+        "cmp %3, %2\n\t"
+        "bne.n 0f\n\t"
+        "strex %1, %4, %0\n\t"
+        "0:"
+        : "+Q"(*location), "=&r"(result), "=&r"(tmp)
+        : "r"(expected), "r"(newValue)
+        : "memory");
+    result = !result;
+#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, need proper impl." << std::endl;
+    unsigned tmp;
+    unsigned result;
     asm volatile(
         "movw %1, #1\n\t"
         "ldrex %2, %0\n\t"
@@ -175,7 +189,7 @@ std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled" << std::endl;
 #error "Bad architecture for compare and swap."
 #endif
     return result;
-#else
+#else    // COMPARE_AND_SWAP --> not enabled.
 std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
@@ -197,6 +211,22 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         : "r"(newValue)
         : "memory"
         );
+    return result;
+#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+std::cerr << "ATUL>>> calling weakCompareAndSwap for ppc64le from here-2." << std::endl;
+    unsigned tmp;
+    unsigned result;
+    asm volatile(
+        "movw %1, #1\n\t"
+        "ldrex %2, %0\n\t"
+        "cmp %3, %2\n\t"
+        "bne.n 0f\n\t"
+        "strex %1, %4, %0\n\t"
+        "0:"
+        : "+Q"(*location), "=&r"(result), "=&r"(tmp)
+        : "r"(expected), "r"(newValue)
+        : "memory");
+    result = !result;
     return result;
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
@@ -252,7 +282,7 @@ inline void memoryBarrierAfterLock() { armV7_dmb(); }
 inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
 
 /* ATUL */
-#elif CPU(WTF_CPU_PPC64) && !defined(WTF_CPU_BIG_ENDIAN)
+#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))
 #warning "ATUL>>> Using ppc64le code for fencing"
 inline void ppc64le_dmb()
 {
