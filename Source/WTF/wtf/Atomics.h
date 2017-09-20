@@ -171,20 +171,9 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
         : "memory");
     result = !result;
 #elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+#warning "ATUL>>> COMPARE_AND_SWAP enabled, need proper impl."
 std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, need proper impl." << std::endl;
-    unsigned tmp;
-    unsigned result;
-    asm volatile(
-        "movw %1, #1\n\t"
-        "ldrex %2, %0\n\t"
-        "cmp %3, %2\n\t"
-        "bne.n 0f\n\t"
-        "strex %1, %4, %0\n\t"
-        "0:"
-        : "+Q"(*location), "=&r"(result), "=&r"(tmp)
-        : "r"(expected), "r"(newValue)
-        : "memory");
-    result = !result;
+    return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
 #error "Bad architecture for compare and swap."
 #endif
@@ -213,21 +202,9 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         );
     return result;
 #elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+#warning "ATUL>>> calling weakCompareAndSwap for ppc64le from here-2."
 std::cerr << "ATUL>>> calling weakCompareAndSwap for ppc64le from here-2." << std::endl;
-    unsigned tmp;
-    unsigned result;
-    asm volatile(
-        "movw %1, #1\n\t"
-        "ldrex %2, %0\n\t"
-        "cmp %3, %2\n\t"
-        "bne.n 0f\n\t"
-        "strex %1, %4, %0\n\t"
-        "0:"
-        : "+Q"(*location), "=&r"(result), "=&r"(tmp)
-        : "r"(expected), "r"(newValue)
-        : "memory");
-    result = !result;
-    return result;
+    return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
 #endif
@@ -254,7 +231,6 @@ inline void compilerFence()
 #if OS(WINDOWS) && !COMPILER(GCC)
     _ReadWriteBarrier();
 #else
-std::cerr << ">>> ATUL: in compilerFence" << std::endl;
     asm volatile("" ::: "memory");
 #endif
 }
@@ -284,19 +260,18 @@ inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
 /* ATUL */
 #elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))
 #warning "ATUL>>> Using ppc64le code for fencing"
-inline void ppc64le_dmb()
+inline void ppc64le_hwsync()
 {
 std::cerr << ">>> ATUL: in ppc64le equiv. compilerFence" << std::endl;
-    asm volatile("lwsync" ::: "memory");
+    asm volatile("sync\n\t" ::: "memory");
 }
 
-inline void loadLoadFence() { ppc64le_dmb(); }
-inline void loadStoreFence() { ppc64le_dmb(); }
-inline void storeLoadFence() { ppc64le_dmb(); }
-inline void storeStoreFence() { ppc64le_dmb(); }
-inline void memoryBarrierAfterLock() { ppc64le_dmb(); }
-inline void memoryBarrierBeforeUnlock() { ppc64le_dmb(); }
-
+inline void loadLoadFence() { ppc64le_hwsync(); }
+inline void loadStoreFence() { ppc64le_hwsync(); }
+inline void storeLoadFence() { ppc64le_hwsync(); }
+inline void storeStoreFence() { ppc64le_hwsync(); }
+inline void memoryBarrierAfterLock() { ppc64le_hwsync(); }
+inline void memoryBarrierBeforeUnlock() { ppc64le_hwsync(); }
 /* ATUL */
 #elif CPU(X86) || CPU(X86_64)
 
