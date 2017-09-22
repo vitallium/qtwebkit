@@ -177,7 +177,6 @@ std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, need proper impl." << std::endl;
 #else
 #error "Bad architecture for compare and swap."
 #endif
-    return result;
 #else    // COMPARE_AND_SWAP --> not enabled.
 std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
     UNUSED_PARAM(location);

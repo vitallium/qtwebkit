@@ -35,12 +35,14 @@
 #define TCMALLOC_INTERNAL_SPINLOCK_H__
 
 #include <wtf/Atomics.h>
+#include <wtf/Platform.h>
 #if OS(UNIX)
 #include <sched.h>
 #endif
 #include "iostream"
 
 #if ENABLE(COMPARE_AND_SWAP)
+#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP enabled"
 
 static void TCMalloc_SlowLock(unsigned* lockword);
 
@@ -86,6 +88,7 @@ std::cerr << "ATUL>>> TCMalloc_SlowLock calling weakCompareAndSwapUIntPtr" << st
 }
 
 #else
+#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP disabled"
 
 #include <pthread.h>
 
