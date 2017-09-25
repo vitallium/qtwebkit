@@ -26,7 +26,6 @@
 #include <wtf/StdLibExtras.h>
 #include <wtf/text/WTFString.h>
 #include <wtf/unicode/Unicode.h>
-#include "iostream"
 
 using namespace WTF;
 using namespace WTF::Unicode;
@@ -243,7 +242,6 @@ static CharBreakIterator* nonSharedCharacterBreakIterator;
 NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator(const UChar* buffer, int length)
 {
     m_iterator = nonSharedCharacterBreakIterator;
-std::cerr << "ATUL>>> NonSharedCharacterBreakIterator::NonSharedCharacterBreakIterator calling weakCompareAndSwapUIntPtr" << std::endl;
     bool createdIterator = m_iterator && weakCompareAndSwap(reinterpret_cast<void**>(&nonSharedCharacterBreakIterator), m_iterator, 0);
     if (!createdIterator)
         m_iterator = new CharBreakIterator;
@@ -252,7 +250,6 @@ std::cerr << "ATUL>>> NonSharedCharacterBreakIterator::NonSharedCharacterBreakIt
 
 NonSharedCharacterBreakIterator::~NonSharedCharacterBreakIterator()
 {
-std::cerr << "ATUL>>> NonSharedCharacterBreakIterator::~NonSharedCharacterBreakIterator calling weakCompareAndSwapUIntPtr" << std::endl;
     if (!weakCompareAndSwap(reinterpret_cast<void**>(&nonSharedCharacterBreakIterator), 0, m_iterator))
         delete m_iterator;
 }

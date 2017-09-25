@@ -36,7 +36,6 @@
 #if !OS(WINDOWS)
 #include <unistd.h>
 #endif
-#include "iostream"
 
 namespace JSC {
 
@@ -101,7 +100,6 @@ SamplingRegion::Locker::Locker()
 #endif
             continue;
         }
-std::cerr << "ATUL>>> SamplingRegion::Locker::Locker" << std::endl;
         if (WTF::weakCompareAndSwapUIntPtr(&s_currentOrReserved, previous, previous | 1))
             break;
     }
@@ -113,7 +111,6 @@ SamplingRegion::Locker::~Locker()
     // abundance of caution (and because it gives us a memory fence, which is
     // never bad).
     uintptr_t previous;
-std::cerr << "ATUL>>> SamplingRegion::Locker::~Locker calling weakCompareAndSwapUIntPtr" << std::endl;
     do {
         previous = s_currentOrReserved;
     } while (!WTF::weakCompareAndSwapUIntPtr(&s_currentOrReserved, previous, previous & ~1));

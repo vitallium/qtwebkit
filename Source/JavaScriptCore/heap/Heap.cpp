@@ -460,6 +460,7 @@ std::cout << "ATUL>>> clearing stackRoots" << std::endl;
     }
 
 #if ENABLE(DFG_JIT)
+std::cout << "ATUL>>> scratchBufferRoots" << std::endl;
     ConservativeRoots scratchBufferRoots(&m_objectSpace.blocks(), &m_storageSpace);
     {
         GCPHASE(GatherScratchBufferRoots);
@@ -476,12 +477,14 @@ std::cout << "ATUL>>> clearing stackRoots" << std::endl;
     SlotVisitor& visitor = m_slotVisitor;
     visitor.setup();
     HeapRootVisitor heapRootVisitor(visitor);
+std::cout << "ATUL>>> create heapRootVisitor" << std::endl;
 
     {
         // ATUL:
         ParallelModeEnabler enabler(visitor);
 
         if (m_vm->codeBlocksBeingCompiled.size()) {
+std::cout << "ATUL>>> visiting active code blocks" << std::endl;
             GCPHASE(VisitActiveCodeBlock);
             for (size_t i = 0; i < m_vm->codeBlocksBeingCompiled.size(); i++)
                 m_vm->codeBlocksBeingCompiled[i]->visitAggregate(visitor);
@@ -490,6 +493,7 @@ std::cout << "ATUL>>> clearing stackRoots" << std::endl;
         m_vm->smallStrings.visitStrongReferences(visitor);
 
         {
+std::cout << "ATUL>> donating machineThreadRoots" << std::endl;
             GCPHASE(VisitMachineRoots);
             MARK_LOG_ROOT(visitor, "C++ Stack");
             visitor.append(machineThreadRoots);
@@ -519,6 +523,7 @@ std::cout << "ATUL>> donating heapRoots" << std::endl;
 std::cout << "ATUL>> completed donating heapRoots" << std::endl;
         }
         {
+std::cout << "ATUL>> donating tempSortVectors" << std::endl;
             GCPHASE(VisitTempSortVectors);
             MARK_LOG_ROOT(visitor, "Temp Sort Vectors");
             markTempSortVectors(heapRootVisitor);
@@ -526,6 +531,7 @@ std::cout << "ATUL>> completed donating heapRoots" << std::endl;
         }
 
         {
+std::cout << "ATUL>> donating argumentBuffer" << std::endl;
             GCPHASE(MarkingArgumentBuffers);
             if (m_markListSet && m_markListSet->size()) {
                 MARK_LOG_ROOT(visitor, "Argument Buffers");
@@ -542,6 +548,7 @@ std::cout << "ATUL>> in vm exception" << std::endl;
         }
     
         {
+std::cout << "ATUL>> donating StrongHandles" << std::endl;
             GCPHASE(VisitStrongHandles);
             MARK_LOG_ROOT(visitor, "Strong Handles");
             m_handleSet.visitStrongHandles(heapRootVisitor);
@@ -549,6 +556,7 @@ std::cout << "ATUL>> in vm exception" << std::endl;
         }
     
         {
+std::cout << "ATUL>> donating handleStack" << std::endl;
             GCPHASE(HandleStack);
             MARK_LOG_ROOT(visitor, "Handle Stack");
             m_handleStack.visit(heapRootVisitor);
@@ -556,6 +564,7 @@ std::cout << "ATUL>> in vm exception" << std::endl;
         }
     
         {
+std::cout << "ATUL>> donating codeBlocks and MarkedStubRoutines" << std::endl;
             GCPHASE(TraceCodeBlocksAndJITStubRoutines);
             MARK_LOG_ROOT(visitor, "Trace Code Blocks and JIT Stub Routines");
             m_dfgCodeBlocks.traceMarkedCodeBlocks(visitor);
@@ -686,6 +695,7 @@ void Heap::deleteAllCompiledCode()
 void Heap::deleteUnmarkedCompiledCode()
 {
     ExecutableBase* next;
+std::cout << "ATUL>> deleting unmarked compiledCode blocks" << std::endl;
     for (ExecutableBase* current = m_compiledCode.head(); current; current = next) {
         next = current->next();
         if (isMarked(current))
@@ -694,11 +704,14 @@ void Heap::deleteUnmarkedCompiledCode()
         // We do this because executable memory is limited on some platforms and because
         // CodeBlock requires eager finalization.
         ExecutableBase::clearCodeVirtual(current);
+std::cout << "ATUL>>> found one to remove" << std::endl;
         m_compiledCode.remove(current);
     }
 
     m_dfgCodeBlocks.deleteUnmarkedJettisonedCodeBlocks();
+std::cout << "ATUL>>> deleted unmarked code block" << std::endl;
     m_jitStubRoutines.deleteUnmarkedJettisonedStubRoutines();
+std::cout << "ATUL>>> deleted stub routines" << std::endl;
 }
 
 void Heap::collectAllGarbage()

@@ -330,10 +330,8 @@ namespace JSC {
     inline bool Heap::isWriteBarrierEnabled()
     {
 #if ENABLE(WRITE_BARRIER_PROFILING)
-#warning "ATUL>>> WRITE_BARRIER_PROFILING enabled"
         return true;
 #else
-#warning "ATUL>>> WRITE_BARRIER_PROFILING disabled"
         return false;
 #endif
     }
