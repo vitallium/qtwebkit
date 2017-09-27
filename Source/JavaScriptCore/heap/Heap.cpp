@@ -586,6 +586,7 @@ std::cout << "ATUL>> donating codeBlocks and MarkedStubRoutines" << std::endl;
         GCPHASE(VisitingLiveWeakHandles);
         MARK_LOG_ROOT(visitor, "Live Weak Handles");
         while (true) {
+            raise (SIGSTOP);  // ATUL
             m_objectSpace.visitWeakSets(heapRootVisitor);
             harvestWeakReferences();
             if (visitor.isEmpty())

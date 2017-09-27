@@ -76,6 +76,7 @@ extern "C" void _ReadWriteBarrier(void);
 #include <sys/atomics.h>
 #endif
 #include "iostream"
+#include <signal.h>
 
 namespace WTF {
 
