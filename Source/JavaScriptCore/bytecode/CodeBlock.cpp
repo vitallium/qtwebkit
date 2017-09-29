@@ -2077,14 +2077,12 @@ void EvalCodeCache::visitAggregate(SlotVisitor& visitor)
 
 void CodeBlock::visitAggregate(SlotVisitor& visitor)
 {
-//std::cerr << "ATUL>>> inside CodeBlock::visitAggregate" << std::endl;
 #if ENABLE(PARALLEL_GC) && ENABLE(DFG_JIT)
     if (!!m_dfgData) {
         // I may be asked to scan myself more than once, and it may even happen concurrently.
         // To this end, use a CAS loop to check if I've been called already. Only one thread
         // may proceed past this point - whichever one wins the CAS race.
         unsigned oldValue;
-//std::cerr << "ATUL>>> CodeBlock::visitAggregate calling weakCompareAndSwap" << std::endl;
         do {
             oldValue = m_dfgData->visitAggregateHasBeenCalled;
             if (oldValue) {

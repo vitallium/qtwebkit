@@ -75,8 +75,8 @@ extern "C" void _ReadWriteBarrier(void);
 #elif OS(ANDROID)
 #include <sys/atomics.h>
 #endif
-#include "iostream"
-#include <signal.h>
+//#include "iostream"  // ATUL
+//#include <signal.h>  // ATUL
 
 namespace WTF {
 
@@ -173,14 +173,14 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
     result = !result;
 //#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
-#warning "ATUL>>> COMPARE_AND_SWAP enabled, using gcc built-in"
-std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, nusing gcc built-in." << std::endl;
+//#warning "ATUL>>> COMPARE_AND_SWAP enabled, using gcc built-in"
+//std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, nusing gcc built-in." << std::endl;
     return __sync_bool_compare_and_swap (location, expected, newValue);
-#else
-#error "Bad architecture for compare and swap."
-#endif
+//#else
+//#error "Bad architecture for compare and swap."
+//#endif
 #else    // COMPARE_AND_SWAP --> not enabled.
-std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
+//std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
     UNUSED_PARAM(newValue);
@@ -202,14 +202,13 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         : "memory"
         );
     return result;
-//#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
-#warning "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in."
-std::cerr << "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in." << std::endl;
+//#warning "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in."
+//std::cerr << "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in." << std::endl;
     return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
-#endif
+#endif // CPU X86
 #else // ENABLE(COMPARE_AND_SWAP)
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
@@ -262,10 +261,10 @@ inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
 /* ATUL */
 //#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
-#warning "ATUL>>> Using ppc64le code for fencing"
+//#warning "ATUL>>> Using ppc64le code for fencing"
 inline void ppc64le_hwsync()
 {
-std::cerr << ">>> ATUL: in ppc64le equiv. compilerFence" << std::endl;
+//std::cerr << ">>> ATUL: in ppc64le equiv. compilerFence" << std::endl;
     asm volatile("sync\n\t" ::: "memory");
 }
 
@@ -299,7 +298,7 @@ inline void memoryBarrierAfterLock() { compilerFence(); }
 inline void memoryBarrierBeforeUnlock() { compilerFence(); }
 
 #else
-#warning "ATUL>>> Using generic code for fencing"
+//#warning "ATUL>>> Using generic code for fencing"
 
 inline void loadLoadFence() { compilerFence(); }
 inline void loadStoreFence() { compilerFence(); }

@@ -27,7 +27,6 @@
 #define PageReservation_h
 
 #include <wtf/PageAllocation.h>
-//#include "iostream" // ATUL
 
 namespace WTF {
 
@@ -82,7 +81,6 @@ public:
         ASSERT(isPageAligned(size));
         ASSERT(contains(start, size));
 
-//std::cerr << ">>> ATUL: start = " << start << ", size = " << size << std::endl;
         m_committed += size;
         OSAllocator::commit(start, size, m_writable, m_executable);
     }
