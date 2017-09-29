@@ -185,7 +185,7 @@ void OSAllocator::commit(void* address, size_t bytes, bool writable, bool execut
         protection |= PROT_WRITE;
     if (executable)
         protection |= PROT_EXEC;
-    if (-1 == mprotect(address, bytes, protection))
+    if (mprotect(address, bytes, protection))
         CRASH();
     madvise(address, bytes, MADV_WILLNEED);
 #elif HAVE(MADV_FREE_REUSE)
