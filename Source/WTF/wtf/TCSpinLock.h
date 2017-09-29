@@ -39,17 +39,17 @@
 #if OS(UNIX)
 #include <sched.h>
 #endif
-#include "iostream"
+//#include "iostream" // ATUL
 
 #if ENABLE(COMPARE_AND_SWAP)
-#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP enabled"
+//#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP enabled"
 
 static void TCMalloc_SlowLock(unsigned* lockword);
 
 // The following is a struct so that it can be initialized at compile time
 struct TCMalloc_SpinLock {
     void Lock() {
-std::cerr << "ATUL>>> TCMalloc_SpinLock::Lock() calling weakCompareAndSwapUIntPtr" << std::endl;
+//std::cerr << "ATUL>>> TCMalloc_SpinLock::Lock() calling weakCompareAndSwapUIntPtr" << std::endl;
       if (!WTF::weakCompareAndSwap(&lockword_, 0, 1))
         TCMalloc_SlowLock(&lockword_);
       WTF::memoryBarrierAfterLock();
@@ -77,7 +77,7 @@ std::cerr << "ATUL>>> TCMalloc_SpinLock::Lock() calling weakCompareAndSwapUIntPt
 #define SPINLOCK_INITIALIZER { 0 }
 
 static void TCMalloc_SlowLock(unsigned* lockword) {
-std::cerr << "ATUL>>> TCMalloc_SlowLock calling weakCompareAndSwapUIntPtr" << std::endl;
+//std::cerr << "ATUL>>> TCMalloc_SlowLock calling weakCompareAndSwapUIntPtr" << std::endl;
   do {
 #if OS(WINDOWS)
     Sleep(0);
@@ -88,7 +88,7 @@ std::cerr << "ATUL>>> TCMalloc_SlowLock calling weakCompareAndSwapUIntPtr" << st
 }
 
 #else
-#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP disabled"
+//#warning "ATUL>>> in TCSpinLock - COMPARE_AND_SWAP disabled"
 
 #include <pthread.h>
 
@@ -103,7 +103,7 @@ struct TCMalloc_SpinLock {
     if (pthread_mutex_destroy(&private_lock_) != 0) CRASH();
   }
   inline void Lock() {
-std::cerr << "ATUL>>> Came to pthread section, TCMalloc_SpinLock::Lock() calling pthread_mutex_lock" << std::endl;
+//std::cerr << "ATUL>>> Came to pthread section, TCMalloc_SpinLock::Lock() calling pthread_mutex_lock" << std::endl;
     if (pthread_mutex_lock(&private_lock_) != 0) CRASH();
   }
   inline void Unlock() {

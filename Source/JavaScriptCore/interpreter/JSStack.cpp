@@ -32,7 +32,6 @@
 
 #include "ConservativeRoots.h"
 #include "Interpreter.h"
-#include "iostream"
 
 namespace JSC {
 

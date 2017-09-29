@@ -25,7 +25,6 @@
 
 #include "config.h"
 #include "OSAllocator.h"
-#include "iostream"
 
 #if OS(UNIX)
 
@@ -186,11 +185,11 @@ void OSAllocator::commit(void* address, size_t bytes, bool writable, bool execut
         protection |= PROT_WRITE;
     if (executable)
         protection |= PROT_EXEC;
-std::cerr << ">>> ATUL: address = " << address << std::endl;
+//std::cerr << ">>> ATUL: address = " << address << std::endl;
     if (-1 == mprotect(address, bytes, protection))
 {
-perror ("mprotect");
-std::cerr << ">>> ATUL: mprotect unable to protect" << std::endl;
+//perror ("mprotect");
+//std::cerr << ">>> ATUL: mprotect unable to protect" << std::endl;
         CRASH();
 }
     madvise(address, bytes, MADV_WILLNEED);

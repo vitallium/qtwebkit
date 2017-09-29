@@ -13,7 +13,6 @@
 #include "JSString.h"
 #include "Operations.h"
 #include <wtf/StackStats.h>
-#include "iostream"
 
 namespace JSC {
 
@@ -130,8 +129,8 @@ void SlotVisitor::drain()
     ASSERT(m_isInParallelMode);
    
 #if ENABLE(PARALLEL_GC)
-#warning "ATUL>>> PARALLEL_GC enabled in drain" << std::endl;
-std::cout << "ATUL>>> PARALLEL_GC enabled in drain" << std::endl;
+//#warning "ATUL>>> PARALLEL_GC enabled in drain" << std::endl;
+//std::cout << "ATUL>>> PARALLEL_GC enabled in drain" << std::endl;
     if (Options::numberOfGCMarkers() > 1) {
         while (!m_stack.isEmpty()) {
             m_stack.refill();
@@ -143,9 +142,9 @@ std::cout << "ATUL>>> PARALLEL_GC enabled in drain" << std::endl;
         mergeOpaqueRootsIfNecessary();
         return;
     }
-#else
-#warning "ATUL>>> PARALLEL_GC disabled in drain" << std::endl;
-std::cout << "ATUL>>> PARALLEL_GC disabled in drain" << std::endl;
+//#else
+//#warning "ATUL>>> PARALLEL_GC disabled in drain" << std::endl;
+//std::cout << "ATUL>>> PARALLEL_GC disabled in drain" << std::endl;
 #endif
     
     while (!m_stack.isEmpty()) {
@@ -249,7 +248,7 @@ void SlotVisitor::mergeOpaqueRoots()
 
 ALWAYS_INLINE bool JSString::tryHashConsLock()
 {
-std::cerr << "ATUL>>> in JSString::tryHashConsLock" << std::endl;
+//std::cerr << "ATUL>>> in JSString::tryHashConsLock" << std::endl;
 #if ENABLE(PARALLEL_GC)
     unsigned currentFlags = m_flags;
 
@@ -258,7 +257,7 @@ std::cerr << "ATUL>>> in JSString::tryHashConsLock" << std::endl;
 
     unsigned newFlags = currentFlags | HashConsLock;
 
-std::cerr << "ATUL>>> JSString::tryHashConsLock calling weakCompareAndSwap" << std::endl;
+//std::cerr << "ATUL>>> JSString::tryHashConsLock calling weakCompareAndSwap" << std::endl;
     if (!WTF::weakCompareAndSwap(&m_flags, currentFlags, newFlags))
         return false;
 
