@@ -75,8 +75,6 @@ extern "C" void _ReadWriteBarrier(void);
 #elif OS(ANDROID)
 #include <sys/atomics.h>
 #endif
-//#include "iostream"  // ATUL
-//#include <signal.h>  // ATUL
 
 namespace WTF {
 
@@ -171,16 +169,14 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
         : "r"(expected), "r"(newValue)
         : "memory");
     result = !result;
-//#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))  /* ATUL */
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
 //#warning "ATUL>>> COMPARE_AND_SWAP enabled, using gcc built-in"
 //std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, nusing gcc built-in." << std::endl;
     return __sync_bool_compare_and_swap (location, expected, newValue);
-//#else
-//#error "Bad architecture for compare and swap."
-//#endif
+#else
+#error "Bad architecture for compare and swap."
+#endif
 #else    // COMPARE_AND_SWAP --> not enabled.
-//std::cerr << "ATUL>>> COMPARE_AND_SWAP disabled" << std::endl;
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
     UNUSED_PARAM(newValue);
