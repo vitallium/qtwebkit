@@ -64,12 +64,10 @@ namespace JSC {
 
         static const size_t defaultCapacity = 512 * 1024;
 #if !(CPU(PPC64) && defined (__LITTLE_ENDIAN__))
-#warning "using x86 code"
         static const size_t commitSize = 16 * 1024;
         // Allow 8k of excess registers before we start trying to reap the stack
         static const ptrdiff_t maxExcessCapacity = 8 * 1024;
 #else /* if PPC64LE */
-#warning "using ppc64le code"
         static const size_t commitSize = 64 * 1024;
         // Allow 64k of excess registers before we start trying to reap the stack
         static const ptrdiff_t maxExcessCapacity = 64 * 1024;

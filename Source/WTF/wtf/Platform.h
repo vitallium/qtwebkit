@@ -1030,14 +1030,14 @@
 #define WTF_USE_IMLANG_FONT_LINK2 1
 #endif
 
-// ATUL: 
+/* Force enable CAS for ppc64le. */
 #if !defined(ENABLE_COMPARE_AND_SWAP) && ( (OS(WINDOWS) || (COMPILER(GCC) && (CPU(X86) || CPU(X86_64) || CPU(ARM_THUMB2)))) || (CPU(PPC64) && defined (__LITTLE_ENDIAN__)) )
 #define ENABLE_COMPARE_AND_SWAP 1
 #endif
 
 #define ENABLE_OBJECT_MARK_LOGGING 0
 
-// ATUL: 
+/* Force enable parallel GC for ppc64le */
 #if !defined(ENABLE_PARALLEL_GC) && !ENABLE(OBJECT_MARK_LOGGING) && (PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(QT) || PLATFORM(BLACKBERRY) || PLATFORM(GTK) || (CPU(PPC64) && defined (__LITTLE_ENDIAN__)) ) && ENABLE(COMPARE_AND_SWAP)
 #define ENABLE_PARALLEL_GC 1
 #endif
