@@ -169,7 +169,7 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
         : "r"(expected), "r"(newValue)
         : "memory");
     result = !result;
-#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
     return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
 #error "Bad architecture for compare and swap."
@@ -197,7 +197,7 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         : "memory"
         );
     return result;
-#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
     return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
