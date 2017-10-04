@@ -724,6 +724,11 @@
 #endif
 #endif
 
+/* ppc64le must fall back to system malloc instead of FastMalloc */
+#if (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
+#define USE_SYSTEM_MALLOC 1
+#endif
+
 #if PLATFORM(EFL)
 #define ENABLE_GLOBAL_FASTMALLOC_NEW 0
 #endif

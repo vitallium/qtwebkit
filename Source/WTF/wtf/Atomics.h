@@ -170,8 +170,6 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
         : "memory");
     result = !result;
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
-//#warning "ATUL>>> COMPARE_AND_SWAP enabled, using gcc built-in"
-//std::cerr << "ATUL>>> COMPARE_AND_SWAP enabled, nusing gcc built-in." << std::endl;
     return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
 #error "Bad architecture for compare and swap."
@@ -199,8 +197,6 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         );
     return result;
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))  /* ATUL */
-//#warning "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in."
-//std::cerr << "ATUL>>> calling weakCompareAndSwap for ppc64le from here-using gcc builr-in." << std::endl;
     return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
@@ -255,12 +251,9 @@ inline void memoryBarrierAfterLock() { armV7_dmb(); }
 inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
 
 /* ATUL */
-//#elif ((defined(__ppc64__) || defined(__PPC64__)) && defined (__LITTLE_ENDIAN__))
 #elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
-//#warning "ATUL>>> Using ppc64le code for fencing"
 inline void ppc64le_hwsync()
 {
-//std::cerr << ">>> ATUL: in ppc64le equiv. compilerFence" << std::endl;
     asm volatile("sync\n\t" ::: "memory");
 }
 
@@ -271,6 +264,7 @@ inline void storeStoreFence() { ppc64le_hwsync(); }
 inline void memoryBarrierAfterLock() { ppc64le_hwsync(); }
 inline void memoryBarrierBeforeUnlock() { ppc64le_hwsync(); }
 /* ATUL */
+
 #elif CPU(X86) || CPU(X86_64)
 
 inline void x86_mfence()
@@ -294,7 +288,6 @@ inline void memoryBarrierAfterLock() { compilerFence(); }
 inline void memoryBarrierBeforeUnlock() { compilerFence(); }
 
 #else
-//#warning "ATUL>>> Using generic code for fencing"
 
 inline void loadLoadFence() { compilerFence(); }
 inline void loadStoreFence() { compilerFence(); }

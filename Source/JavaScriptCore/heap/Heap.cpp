@@ -50,13 +50,8 @@ namespace JSC {
 
 namespace { 
 
-/* ATUL: try defaults */
 static const size_t largeHeapSize = 32 * MB; // About 1.5X the average webpage.
 static const size_t smallHeapSize = 1 * MB; // Matches the FastMalloc per-thread cache.
-// ATUL
-//static const size_t largeHeapSize = 64* 32 * MB; // About 1.5X the average webpage.
-//static const size_t smallHeapSize = 16* 1 * MB; // Matches the FastMalloc per-thread cache.
-// ATUL
 
 #if ENABLE(GC_LOGGING)
 #if COMPILER(CLANG)

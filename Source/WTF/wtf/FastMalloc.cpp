@@ -99,13 +99,12 @@
 #endif
 #endif
 
-#define USE_SYSTEM_MALLOC 1
 #if !(defined(USE_SYSTEM_MALLOC) && USE_SYSTEM_MALLOC) && defined(NDEBUG)
 #define FORCE_SYSTEM_MALLOC 0
-#warning "ATUL>>> sys malloc is 0"
+#warning "ATUL>>> NOT using system malloc"
 #else
 #define FORCE_SYSTEM_MALLOC 1
-#warning "ATUL>>> sys malloc is 1"
+#warning "ATUL>>> using system malloc"
 #endif
 
 // Harden the pointers stored in the TCMalloc linked lists
