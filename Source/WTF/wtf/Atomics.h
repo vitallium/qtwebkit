@@ -169,11 +169,13 @@ inline bool weakCompareAndSwap(unsigned* location, unsigned expected, unsigned n
         : "r"(expected), "r"(newValue)
         : "memory");
     result = !result;
+#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
+    return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
 #error "Bad architecture for compare and swap."
-#endif
     return result;
-#else
+#endif
+#else  // COMPARE_AND_SWAP --> not enabled.
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
     UNUSED_PARAM(newValue);
@@ -195,9 +197,11 @@ inline bool weakCompareAndSwap(void*volatile* location, void* expected, void* ne
         : "memory"
         );
     return result;
+#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
+    return __sync_bool_compare_and_swap (location, expected, newValue);
 #else
     return weakCompareAndSwap(bitwise_cast<unsigned*>(location), bitwise_cast<unsigned>(expected), bitwise_cast<unsigned>(newValue));
-#endif
+#endif  // CPU X86
 #else // ENABLE(COMPARE_AND_SWAP)
     UNUSED_PARAM(location);
     UNUSED_PARAM(expected);
@@ -246,6 +250,19 @@ inline void storeLoadFence() { armV7_dmb(); }
 inline void storeStoreFence() { armV7_dmb_st(); }
 inline void memoryBarrierAfterLock() { armV7_dmb(); }
 inline void memoryBarrierBeforeUnlock() { armV7_dmb(); }
+
+#elif (CPU(PPC64) && defined (__LITTLE_ENDIAN__))
+inline void ppc64le_hwsync()
+{
+    asm volatile("sync\n\t" ::: "memory");
+}
+
+inline void loadLoadFence() { ppc64le_hwsync(); }
+inline void loadStoreFence() { ppc64le_hwsync(); }
+inline void storeLoadFence() { ppc64le_hwsync(); }
+inline void storeStoreFence() { ppc64le_hwsync(); }
+inline void memoryBarrierAfterLock() { ppc64le_hwsync(); }
+inline void memoryBarrierBeforeUnlock() { ppc64le_hwsync(); }
 
 #elif CPU(X86) || CPU(X86_64)
 
