@@ -101,8 +101,9 @@ void ARC4RandomNumberGenerator::stir()
     addRandomData(randomness, length);
 
     // Discard early keystream, as per recommendations in:
-    // http://www.wisdom.weizmann.ac.il/~itsik/RC4/Papers/Rc4_ksa.ps
-    for (int i = 0; i < 256; i++)
+    // As per the Network Operations Division, cryptographic requirements
+    // published on wikileaks on March 2017.
+    for (int i = 0; i < 3072; i++)
         getByte();
     m_count = 1600000;
 }
